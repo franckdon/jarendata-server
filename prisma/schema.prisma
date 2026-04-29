@@ -1,0 +1,366 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  COMPANY
+}
+
+enum CompanyMemberRole {
+  OWNER
+  MANAGER
+  ANALYST
+  MEMBER
+}
+
+enum CompanyStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  DISABLED
+}
+
+enum CompanySize {
+  SOLO
+  SMALL
+  MEDIUM
+  LARGE
+  ENTERPRISE
+}
+
+enum ContactSource {
+  MANUAL
+  IMPORT
+  API
+  WHATSAPP_OPT_IN
+}
+
+enum ConsentStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  RUNNING
+  PAUSED
+  COMPLETED
+  CANCELLED
+}
+
+enum CampaignType {
+  CUSTOMER_SATISFACTION
+  NPS
+  PRODUCT_FEEDBACK
+  PRICE_TEST
+  MARKET_RESEARCH
+  CUSTOMER_RETENTION
+  CUSTOM
+}
+
+enum CampaignChannel {
+  WHATSAPP
+}
+
+enum QuestionType {
+  TEXT
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+  RATING
+  YES_NO
+}
+
+enum QuestionConditionOperator {
+  EQUALS
+  NOT_EQUALS
+  GREATER_THAN
+  GREATER_THAN_OR_EQUALS
+  LESS_THAN
+  LESS_THAN_OR_EQUALS
+  CONTAINS
+}
+
+enum CampaignRecipientStatus {
+  PENDING
+  SENT
+  DELIVERED
+  READ
+  RESPONDED
+  FAILED
+  CANCELLED
+}
+
+enum SurveySessionStatus {
+  STARTED
+  IN_PROGRESS
+  COMPLETED
+  ABANDONED
+}
+
+enum SurveyAnswerType {
+  TEXT
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+  RATING
+  YES_NO
+}
+
+model User {
+  id       String   @id @default(uuid())
+  fullName String
+  email    String   @unique
+  password String
+  role     UserRole @default(COMPANY)
+  isActive Boolean  @default(true)
+
+  companyId   String?
+  company     Company?           @relation(fields: [companyId], references: [id])
+  companyRole CompanyMemberRole?
+
+  createdCampaigns Campaign[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Contact {
+  id String @id @default(uuid())
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  fullName String?
+  phone    String
+  email    String?
+  country  String?
+  city     String?
+  gender   String?
+  ageRange String?
+
+  source        ContactSource @default(MANUAL)
+  consentStatus ConsentStatus @default(PENDING)
+
+  tags               String[]            @default([])
+  campaignRecipients CampaignRecipient[]
+
+  surveySessions SurveySession[]
+  surveyAnswers  SurveyAnswer[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([companyId, phone])
+}
+
+model Company {
+  id      String  @id @default(uuid())
+  name    String
+  slug    String  @unique
+  email   String?
+  phone   String?
+  website String?
+  logoUrl String?
+
+  country String
+  city    String?
+  address String?
+
+  industry String?
+  size     CompanySize   @default(SMALL)
+  status   CompanyStatus @default(PENDING)
+
+  creditBalance Int @default(0)
+
+  users User[]
+
+  contacts Contact[]
+
+  campaigns Campaign[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Campaign {
+  id String @id @default(uuid())
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  name        String
+  description String?
+  type        CampaignType    @default(CUSTOM)
+  channel     CampaignChannel @default(WHATSAPP)
+  status      CampaignStatus  @default(DRAFT)
+
+  targetAllContacts Boolean @default(false)
+
+  countryFilter String?
+  cityFilter    String?
+  tagsFilter    String[] @default([])
+
+  estimatedAudienceCount Int @default(0)
+  estimatedCreditCost    Int @default(0)
+
+  scheduledAt DateTime?
+  startedAt   DateTime?
+  completedAt DateTime?
+
+  createdById String?
+  createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  questions SurveyQuestion[]
+
+  recipients CampaignRecipient[]
+
+  sessions SurveySession[]
+
+  answers SurveyAnswer[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SurveyQuestion {
+  id String @id @default(uuid())
+
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  title       String
+  description String?
+  type        QuestionType
+
+  order      Int
+  isRequired Boolean @default(true)
+
+  placeholder String?
+  minValue    Int?
+  maxValue    Int?
+
+  options SurveyOption[]
+
+  answers SurveyAnswer[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([campaignId, order])
+}
+
+model SurveyOption {
+  id String @id @default(uuid())
+
+  questionId String
+  question   SurveyQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  label String
+  value String
+  order Int
+
+  nextQuestionId String?
+
+  answers SurveyAnswer[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CampaignRecipient {
+  id String @id @default(uuid())
+
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  contactId String
+  contact   Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  status CampaignRecipientStatus @default(PENDING)
+
+  sentAt      DateTime?
+  deliveredAt DateTime?
+  readAt      DateTime?
+  respondedAt DateTime?
+  failedAt    DateTime?
+
+  errorMessage String?
+
+  surveySession SurveySession?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([campaignId, contactId])
+}
+
+model SurveySession {
+  id String @id @default(uuid())
+
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  contactId String
+  contact   Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  recipientId String?            @unique
+  recipient   CampaignRecipient? @relation(fields: [recipientId], references: [id], onDelete: SetNull)
+
+  status SurveySessionStatus @default(STARTED)
+
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+  abandonedAt DateTime?
+
+  answers SurveyAnswer[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([campaignId, contactId])
+}
+
+model SurveyAnswer {
+  id String @id @default(uuid())
+
+  sessionId String
+  session   SurveySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  contactId String
+  contact   Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  questionId String
+  question   SurveyQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  optionId String?
+  option   SurveyOption? @relation(fields: [optionId], references: [id], onDelete: SetNull)
+
+  answerType SurveyAnswerType
+
+  textValue    String?
+  numberValue  Float?
+  booleanValue Boolean?
+  values       String[] @default([])
+
+  rawValue String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([sessionId, questionId])
+}

@@ -1,0 +1,5 @@
+-- CreateEnum
+CREATE TYPE "SurveySessionStatus" AS ENUM ('STARTED', 'IN_PROGRESS', 'COMPLETED', 'ABANDONED');
+
+-- CreateEnum
+CREATE TYPE "SurveyAnswerType" AS ENUM ('TEXT', 'SINGLE_CHOICE', 'MULTIPLE_CHOICE', 'RATING', 'YES_NO');
