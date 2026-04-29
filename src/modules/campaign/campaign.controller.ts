@@ -121,9 +121,10 @@ export const updateCampaignStatusController = async (
     const data = updateCampaignStatusSchema.parse(req.body);
 
     const campaign = await updateCampaignStatusService(
-      req.user.companyId,
-      req.params.id,
-      data
+        req.user.companyId,
+        req.user.userId,
+        req.params.id,
+        data
     );
 
     res.status(200).json({

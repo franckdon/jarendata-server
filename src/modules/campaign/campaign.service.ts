@@ -1,6 +1,7 @@
 import { prisma } from "../../config/prisma";
 import { AppError } from "../../utils/appError";
 import { paginate } from "../../utils/pagination";
+import { consumeCreditsForCampaignService } from "../credit/credit.service";
 import {
   CampaignQuery,
   CreateCampaignInput,
@@ -285,6 +286,7 @@ export const deleteCampaignService = async (
 
 export const updateCampaignStatusService = async (
   companyId: string | null | undefined,
+  userId: string,
   campaignId: string,
   data: UpdateCampaignStatusInput
 ) => {
@@ -303,7 +305,7 @@ export const updateCampaignStatusService = async (
     throw new AppError("Campagne introuvable", 404);
   }
 
-  if (data.status === "RUNNING") {
+    if (data.status === "RUNNING") {
     const company = await prisma.company.findUnique({
       where: { id: companyId },
     });
@@ -315,6 +317,14 @@ export const updateCampaignStatusService = async (
     if (company.creditBalance < campaign.estimatedCreditCost) {
       throw new AppError("Crédits insuffisants pour lancer cette campagne", 403);
     }
+
+    await consumeCreditsForCampaignService({
+      companyId,
+      campaignId,
+      userId,
+      amount: campaign.estimatedCreditCost,
+      description: `Lancement de la campagne : ${campaign.name}`,
+    });
   }
 
   const updatedCampaign = await prisma.campaign.update({

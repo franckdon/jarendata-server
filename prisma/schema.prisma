@@ -118,6 +118,21 @@ enum SurveyAnswerType {
   YES_NO
 }
 
+enum CreditTransactionType {
+  CREDIT
+  DEBIT
+  REFUND
+  ADJUSTMENT
+}
+
+enum CreditTransactionReason {
+  INITIAL_BONUS
+  ADMIN_TOPUP
+  CAMPAIGN_LAUNCH
+  CAMPAIGN_REFUND
+  MANUAL_ADJUSTMENT
+}
+
 model User {
   id       String   @id @default(uuid())
   fullName String
@@ -131,6 +146,8 @@ model User {
   companyRole CompanyMemberRole?
 
   createdCampaigns Campaign[]
+
+  creditTransactions CreditTransaction[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -190,6 +207,8 @@ model Company {
 
   campaigns Campaign[]
 
+  creditTransactions CreditTransaction[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -229,6 +248,8 @@ model Campaign {
   sessions SurveySession[]
 
   answers SurveyAnswer[]
+
+  creditTransactions CreditTransaction[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -363,4 +384,29 @@ model SurveyAnswer {
   updatedAt DateTime @updatedAt
 
   @@unique([sessionId, questionId])
+}
+
+model CreditTransaction {
+  id String @id @default(uuid())
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  campaignId String?
+  campaign   Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
+  createdById String?
+  createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  type   CreditTransactionType
+  reason CreditTransactionReason
+
+  amount        Int
+  balanceBefore Int
+  balanceAfter  Int
+
+  description String?
+  metadata    Json?
+
+  createdAt DateTime @default(now())
 }
