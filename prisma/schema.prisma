@@ -167,7 +167,7 @@ model User {
   isActive Boolean  @default(true)
 
   companyId   String?
-  company     Company?           @relation(fields: [companyId], references: [id])
+  company     Company?           @relation(fields: [companyId], references: [id], onDelete: SetNull)
   companyRole CompanyMemberRole?
 
   createdCampaigns Campaign[]

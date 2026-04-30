@@ -1,11 +1,70 @@
+import fs from "fs";
+import path from "path";
 import { prisma } from "../../config/prisma";
 import { AppError } from "../../utils/appError";
 import { generateSlug } from "../../utils/slug";
 import {
+  CreateCompanyInput,
   UpdateCompanyInput,
   UpdateCompanyStatusInput,
 } from "./company.validation";
 import { paginate, PaginationQuery } from "../../utils/pagination";
+
+const removeOldLogo = (logoUrl?: string | null) => {
+  if (!logoUrl) return;
+
+  const relativePath = logoUrl.replace(/^\/+/, "");
+  const filePath = path.join(process.cwd(), relativePath);
+
+  if (fs.existsSync(filePath)) {
+    fs.unlinkSync(filePath);
+  }
+};
+
+const generateUniqueCompanySlug = async (
+  name: string,
+  currentCompanyId?: string
+) => {
+  const baseSlug = generateSlug(name);
+
+  const existingCompany = await prisma.company.findUnique({
+    where: { slug: baseSlug },
+  });
+
+  if (!existingCompany) return baseSlug;
+
+  if (currentCompanyId && existingCompany.id === currentCompanyId) {
+    return baseSlug;
+  }
+
+  return `${baseSlug}-${Date.now()}`;
+};
+
+export const createCompanyService = async (
+  data: CreateCompanyInput,
+  logoUrl?: string
+) => {
+  const slug = await generateUniqueCompanySlug(data.name);
+
+  const company = await prisma.company.create({
+    data: {
+      name: data.name,
+      slug,
+      email: data.email,
+      phone: data.phone,
+      website: data.website,
+      country: data.country,
+      city: data.city,
+      address: data.address,
+      industry: data.industry,
+      size: data.size,
+      status: data.status,
+      logoUrl,
+    },
+  });
+
+  return company;
+};
 
 export const getMyCompanyService = async (userId: string) => {
   const user = await prisma.user.findUnique({
@@ -28,30 +87,26 @@ export const getMyCompanyService = async (userId: string) => {
 
 export const updateMyCompanyService = async (
   userId: string,
-  data: UpdateCompanyInput
+  data: UpdateCompanyInput,
+  logoUrl?: string
 ) => {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     include: { company: true },
   });
 
-  if (!user || !user.companyId) {
+  if (!user || !user.companyId || !user.company) {
     throw new AppError("Entreprise introuvable", 404);
   }
 
   let slug: string | undefined;
 
-  if (data.name && data.name !== user.company?.name) {
-    const baseSlug = generateSlug(data.name);
+  if (data.name && data.name !== user.company.name) {
+    slug = await generateUniqueCompanySlug(data.name, user.companyId);
+  }
 
-    const existingCompany = await prisma.company.findUnique({
-      where: { slug: baseSlug },
-    });
-
-    slug =
-      existingCompany && existingCompany.id !== user.companyId
-        ? `${baseSlug}-${Date.now()}`
-        : baseSlug;
+  if (logoUrl && user.company.logoUrl) {
+    removeOldLogo(user.company.logoUrl);
   }
 
   const company = await prisma.company.update({
@@ -59,6 +114,7 @@ export const updateMyCompanyService = async (
     data: {
       ...data,
       ...(slug ? { slug } : {}),
+      ...(logoUrl ? { logoUrl } : {}),
     },
   });
 
@@ -112,6 +168,7 @@ export const getCompanyByIdService = async (companyId: string) => {
           fullName: true,
           email: true,
           role: true,
+          companyRole: true,
           isActive: true,
           createdAt: true,
         },
@@ -124,6 +181,41 @@ export const getCompanyByIdService = async (companyId: string) => {
   }
 
   return company;
+};
+
+export const updateCompanyService = async (
+  companyId: string,
+  data: UpdateCompanyInput,
+  logoUrl?: string
+) => {
+  const company = await prisma.company.findUnique({
+    where: { id: companyId },
+  });
+
+  if (!company) {
+    throw new AppError("Entreprise introuvable", 404);
+  }
+
+  let slug: string | undefined;
+
+  if (data.name && data.name !== company.name) {
+    slug = await generateUniqueCompanySlug(data.name, companyId);
+  }
+
+  if (logoUrl && company.logoUrl) {
+    removeOldLogo(company.logoUrl);
+  }
+
+  const updatedCompany = await prisma.company.update({
+    where: { id: companyId },
+    data: {
+      ...data,
+      ...(slug ? { slug } : {}),
+      ...(logoUrl ? { logoUrl } : {}),
+    },
+  });
+
+  return updatedCompany;
 };
 
 export const updateCompanyStatusService = async (
@@ -146,4 +238,20 @@ export const updateCompanyStatusService = async (
   });
 
   return updatedCompany;
+};
+
+export const deleteCompanyService = async (companyId: string) => {
+  const company = await prisma.company.findUnique({
+    where: { id: companyId },
+  });
+
+  if (!company) {
+    throw new AppError("Entreprise introuvable", 404);
+  }
+
+  await prisma.company.delete({
+    where: { id: companyId },
+  });
+
+  removeOldLogo(company.logoUrl);
 };
