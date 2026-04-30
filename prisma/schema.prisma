@@ -133,6 +133,31 @@ enum CreditTransactionReason {
   MANUAL_ADJUSTMENT
 }
 
+enum MessagingProvider {
+  META
+  TWILIO
+  MOCK
+}
+
+enum MessagingAccountScope {
+  PLATFORM
+  COMPANY
+}
+
+enum MessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum MessageStatus {
+  PENDING
+  SENT
+  DELIVERED
+  READ
+  FAILED
+  RECEIVED
+}
+
 model User {
   id       String   @id @default(uuid())
   fullName String
@@ -167,8 +192,14 @@ model Contact {
   gender   String?
   ageRange String?
 
+  externalId String?
+  metadata   Json?
+
   source        ContactSource @default(MANUAL)
   consentStatus ConsentStatus @default(PENDING)
+
+  optInAt     DateTime?
+  consentText String?
 
   tags               String[]            @default([])
   campaignRecipients CampaignRecipient[]
@@ -176,10 +207,13 @@ model Contact {
   surveySessions SurveySession[]
   surveyAnswers  SurveyAnswer[]
 
+  messageLogs MessageLog[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([companyId, phone])
+  @@unique([companyId, externalId])
 }
 
 model Company {
@@ -208,6 +242,9 @@ model Company {
   campaigns Campaign[]
 
   creditTransactions CreditTransaction[]
+
+  messagingAccounts MessagingAccount[]
+  messageLogs       MessageLog[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -250,6 +287,8 @@ model Campaign {
   answers SurveyAnswer[]
 
   creditTransactions CreditTransaction[]
+
+  messageLogs MessageLog[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -320,6 +359,8 @@ model CampaignRecipient {
   errorMessage String?
 
   surveySession SurveySession?
+
+  messageLogs MessageLog[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -409,4 +450,69 @@ model CreditTransaction {
   metadata    Json?
 
   createdAt DateTime @default(now())
+}
+
+model MessagingAccount {
+  id String @id @default(uuid())
+
+  scope MessagingAccountScope @default(COMPANY)
+
+  companyId String?
+  company   Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  provider MessagingProvider @default(META)
+
+  name String
+
+  phoneNumberId      String?
+  businessAccountId  String?
+  accessToken        String?
+  webhookVerifyToken String?
+  fromPhoneNumber    String?
+
+  isDefault Boolean @default(false)
+  isActive  Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  messageLogs MessageLog[]
+
+  @@index([companyId])
+  @@index([scope])
+}
+
+model MessageLog {
+  id String @id @default(uuid())
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  messagingAccountId String?
+  messagingAccount   MessagingAccount? @relation(fields: [messagingAccountId], references: [id], onDelete: SetNull)
+
+  campaignId String?
+  campaign   Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
+  contactId String?
+  contact   Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
+
+  recipientId String?
+  recipient   CampaignRecipient? @relation(fields: [recipientId], references: [id], onDelete: SetNull)
+
+  direction MessageDirection
+  status    MessageStatus    @default(PENDING)
+
+  provider MessagingProvider
+
+  waMessageId String?
+  fromPhone   String?
+  toPhone     String?
+
+  body         String?
+  payload      Json?
+  errorMessage String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

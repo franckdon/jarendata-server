@@ -13,6 +13,7 @@ import surveyRoutes from "./modules/survey/survey.routes";
 import dispatchRoutes from "./modules/dispatch/dispatch.routes";
 import responseRoutes from "./modules/response/response.routes";
 import creditRoutes from "./modules/credit/credit.routes";
+import messagingRoutes from "./modules/messaging/messaging.routes";
 
 const app = express();
 
@@ -68,6 +69,7 @@ app.use("/api/survey", surveyRoutes);
 app.use("/api/dispatch", dispatchRoutes);
 app.use("/api/responses", responseRoutes);
 app.use("/api/credits", creditRoutes);
+app.use("/api/messaging", messagingRoutes);
 
 app.use(errorMiddleware);
 
