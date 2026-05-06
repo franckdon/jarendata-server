@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   addCreditsController,
   adjustCreditsController,
+  adminGetAllCreditTransactionsController,
   adminGetCompanyCreditTransactionsController,
   getMyCreditBalanceController,
   getMyCreditTransactionsController,
@@ -28,6 +29,12 @@ router.get(
   authorizeRoles("COMPANY"),
   authorizeCompanyRoles("OWNER", "MANAGER", "ANALYST"),
   getMyCreditTransactionsController
+);
+
+router.get(
+  "/admin/transactions",
+  authorizeRoles("ADMIN"),
+  adminGetAllCreditTransactionsController
 );
 
 router.get(

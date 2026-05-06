@@ -1,11 +1,15 @@
 import { Router } from "express";
 import {
   createCompanyController,
+  createCompanyMemberController,
   deleteCompanyController,
+  deleteCompanyMemberController,
   getCompaniesController,
   getCompanyByIdController,
   getMyCompanyController,
   updateCompanyController,
+  updateCompanyMemberRoleController,
+  updateCompanyMemberStatusController,
   updateCompanyStatusController,
   updateMyCompanyController,
 } from "./company.controller";
@@ -45,6 +49,34 @@ router.get(
   authMiddleware,
   authorizeRoles("ADMIN"),
   getCompaniesController
+);
+
+router.post(
+  "/:id/members",
+  authMiddleware,
+  authorizeRoles("ADMIN"),
+  createCompanyMemberController
+);
+
+router.patch(
+  "/:id/members/:userId/role",
+  authMiddleware,
+  authorizeRoles("ADMIN"),
+  updateCompanyMemberRoleController
+);
+
+router.patch(
+  "/:id/members/:userId/status",
+  authMiddleware,
+  authorizeRoles("ADMIN"),
+  updateCompanyMemberStatusController
+);
+
+router.delete(
+  "/:id/members/:userId",
+  authMiddleware,
+  authorizeRoles("ADMIN"),
+  deleteCompanyMemberController
 );
 
 router.get(

@@ -62,6 +62,35 @@ export const updateCompanyStatusSchema = z.object({
   status: z.enum(["PENDING", "ACTIVE", "SUSPENDED", "DISABLED"]),
 });
 
+export const createCompanyMemberSchema = z.object({
+  fullName: z.string().trim().min(2, "Le nom complet est obligatoire"),
+  email: z.string().trim().email("Email invalide"),
+  password: z
+    .string()
+    .min(6, "Le mot de passe doit contenir au moins 6 caractères"),
+  companyRole: z.enum(["MANAGER", "ANALYST", "MEMBER"]),
+});
+
+export const updateCompanyMemberRoleSchema = z.object({
+  companyRole: z.enum(["MANAGER", "ANALYST", "MEMBER"]),
+});
+
+export const updateCompanyMemberStatusSchema = z.object({
+  isActive: z.boolean(),
+});
+
+export type CreateCompanyMemberInput = z.infer<
+  typeof createCompanyMemberSchema
+>;
+
+export type UpdateCompanyMemberRoleInput = z.infer<
+  typeof updateCompanyMemberRoleSchema
+>;
+
+export type UpdateCompanyMemberStatusInput = z.infer<
+  typeof updateCompanyMemberStatusSchema
+>;
+
 export type CreateCompanyInput = z.infer<typeof createCompanySchema>;
 export type UpdateCompanyInput = z.infer<typeof updateCompanySchema>;
 export type UpdateCompanyStatusInput = z.infer<

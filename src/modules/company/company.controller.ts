@@ -1,16 +1,23 @@
 import { NextFunction, Request, Response } from "express";
 import {
+  createCompanyMemberService,
   createCompanyService,
+  deleteCompanyMemberService,
   deleteCompanyService,
   getCompaniesService,
   getCompanyByIdService,
   getMyCompanyService,
+  updateCompanyMemberRoleService,
+  updateCompanyMemberStatusService,
   updateCompanyService,
   updateCompanyStatusService,
   updateMyCompanyService,
 } from "./company.service";
 import {
+  createCompanyMemberSchema,
   createCompanySchema,
+  updateCompanyMemberRoleSchema,
+  updateCompanyMemberStatusSchema,
   updateCompanySchema,
   updateCompanyStatusSchema,
 } from "./company.validation";
@@ -164,6 +171,87 @@ export const deleteCompanyController = async (
 
     res.status(200).json({
       message: "Entreprise supprimée avec succès",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const createCompanyMemberController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const data = createCompanyMemberSchema.parse(req.body);
+
+    const member = await createCompanyMemberService(req.params.id, data);
+
+    res.status(201).json({
+      message: "Membre ajouté avec succès",
+      data: member,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateCompanyMemberRoleController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const data = updateCompanyMemberRoleSchema.parse(req.body);
+
+    const member = await updateCompanyMemberRoleService(
+      req.params.id,
+      req.params.userId,
+      data
+    );
+
+    res.status(200).json({
+      message: "Rôle du membre mis à jour avec succès",
+      data: member,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateCompanyMemberStatusController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const data = updateCompanyMemberStatusSchema.parse(req.body);
+
+    const member = await updateCompanyMemberStatusService(
+      req.params.id,
+      req.params.userId,
+      data
+    );
+
+    res.status(200).json({
+      message: "Statut du membre mis à jour avec succès",
+      data: member,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteCompanyMemberController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    await deleteCompanyMemberService(req.params.id, req.params.userId);
+
+    res.status(200).json({
+      message: "Membre supprimé avec succès",
     });
   } catch (error) {
     next(error);

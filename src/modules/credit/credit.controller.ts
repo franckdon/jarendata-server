@@ -5,6 +5,7 @@ import {
   adjustCreditsService,
   getMyCreditBalanceService,
   getMyCreditTransactionsService,
+  adminGetAllCreditTransactionsService,
 } from "./credit.service";
 import { addCreditsSchema, adjustCreditsSchema } from "./credit.validation";
 
@@ -95,6 +96,23 @@ export const adjustCreditsController = async (
     res.status(200).json({
       message: "Crédits ajustés avec succès",
       data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const adminGetAllCreditTransactionsController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const transactions = await adminGetAllCreditTransactionsService(req.query);
+
+    res.status(200).json({
+      message: "Historique global des crédits récupéré avec succès",
+      ...transactions,
     });
   } catch (error) {
     next(error);

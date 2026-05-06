@@ -18,6 +18,7 @@ export type AdjustCreditsInput = z.infer<typeof adjustCreditsSchema>;
 export type CreditQuery = {
   page?: string | number;
   limit?: string | number;
+  companyId?: string;
   type?: "CREDIT" | "DEBIT" | "REFUND" | "ADJUSTMENT";
   reason?:
     | "INITIAL_BONUS"

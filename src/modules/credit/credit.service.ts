@@ -365,3 +365,43 @@ export const refundCampaignCreditsService = async ({
 
   return result;
 };
+
+export const adminGetAllCreditTransactionsService = async (
+  query: CreditQuery
+) => {
+  return paginate({
+    model: prisma.creditTransaction,
+    page: query.page,
+    limit: query.limit,
+    where: {
+      ...(query.companyId ? { companyId: query.companyId } : {}),
+      ...(query.type ? { type: query.type } : {}),
+      ...(query.reason ? { reason: query.reason } : {}),
+    },
+    orderBy: { createdAt: "desc" },
+    include: {
+      company: {
+        select: {
+          id: true,
+          name: true,
+          creditBalance: true,
+        },
+      },
+      campaign: {
+        select: {
+          id: true,
+          name: true,
+          status: true,
+        },
+      },
+      createdBy: {
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          role: true,
+        },
+      },
+    },
+  });
+};
