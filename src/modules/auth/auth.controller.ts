@@ -56,6 +56,7 @@ export const meController = async (
   }
 };
 
+// Controller pour mettre à jour le profil de l'utilisateur connecté
 export const updateMeController = async (
   req: Request,
   res: Response,
