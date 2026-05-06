@@ -114,7 +114,7 @@ export const getContactByIdController = async (
   try {
     const contact = await getContactByIdService(
       req.user.companyId,
-      req.params.id
+      String(req.params.id)
     );
 
     res.status(200).json({
@@ -136,7 +136,7 @@ export const updateContactController = async (
 
     const contact = await updateContactService(
       req.user.companyId,
-      req.params.id,
+      String(req.params.id),
       data
     );
 
@@ -155,7 +155,7 @@ export const deleteContactController = async (
   next: NextFunction
 ) => {
   try {
-    await deleteContactService(req.user.companyId, req.params.id);
+    await deleteContactService(req.user.companyId, String(req.params.id));
 
     res.status(200).json({
       message: "Contact supprimé avec succès",

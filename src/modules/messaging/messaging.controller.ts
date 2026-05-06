@@ -117,7 +117,7 @@ export const sendCampaignMessagesController = async (
 
     const result = await sendCampaignMessagesService(
       req.user.companyId,
-      req.params.campaignId,
+      String(req.params.campaignId),
       data
     );
 

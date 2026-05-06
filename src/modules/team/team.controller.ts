@@ -57,7 +57,7 @@ export const updateTeamMemberRoleController = async (
 
     const member = await updateTeamMemberRoleService(
       req.user.companyId,
-      req.params.userId,
+      String(req.params.userId),
       data
     );
 
@@ -80,7 +80,7 @@ export const updateTeamMemberStatusController = async (
 
     const member = await updateTeamMemberStatusService(
       req.user.companyId,
-      req.params.userId,
+      String(req.params.userId),
       data
     );
 
@@ -99,7 +99,7 @@ export const deleteTeamMemberController = async (
   next: NextFunction
 ) => {
   try {
-    await deleteTeamMemberService(req.user.companyId, req.params.userId);
+    await deleteTeamMemberService(req.user.companyId, String(req.params.userId));
 
     res.status(200).json({
       message: "Membre supprimé avec succès",

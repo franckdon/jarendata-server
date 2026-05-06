@@ -1,0 +1,15 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const campaign_controller_1 = require("./campaign.controller");
+const auth_middleware_1 = require("../../middlewares/auth.middleware");
+const router = (0, express_1.Router)();
+router.use(auth_middleware_1.authMiddleware);
+router.use((0, auth_middleware_1.authorizeRoles)("COMPANY"));
+router.get("/", (0, auth_middleware_1.authorizeCompanyRoles)("OWNER", "MANAGER", "ANALYST", "MEMBER"), campaign_controller_1.getCampaignsController);
+router.post("/", (0, auth_middleware_1.authorizeCompanyRoles)("OWNER", "MANAGER"), campaign_controller_1.createCampaignController);
+router.get("/:id", (0, auth_middleware_1.authorizeCompanyRoles)("OWNER", "MANAGER", "ANALYST", "MEMBER"), campaign_controller_1.getCampaignByIdController);
+router.patch("/:id", (0, auth_middleware_1.authorizeCompanyRoles)("OWNER", "MANAGER"), campaign_controller_1.updateCampaignController);
+router.patch("/:id/status", (0, auth_middleware_1.authorizeCompanyRoles)("OWNER", "MANAGER"), campaign_controller_1.updateCampaignStatusController);
+router.delete("/:id", (0, auth_middleware_1.authorizeCompanyRoles)("OWNER"), campaign_controller_1.deleteCampaignController);
+exports.default = router;

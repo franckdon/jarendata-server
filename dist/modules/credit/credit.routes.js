@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const credit_controller_1 = require("./credit.controller");
+const auth_middleware_1 = require("../../middlewares/auth.middleware");
+const router = (0, express_1.Router)();
+router.use(auth_middleware_1.authMiddleware);
+router.get("/me/balance", (0, auth_middleware_1.authorizeRoles)("COMPANY"), (0, auth_middleware_1.authorizeCompanyRoles)("OWNER", "MANAGER", "ANALYST"), credit_controller_1.getMyCreditBalanceController);
+router.get("/me/transactions", (0, auth_middleware_1.authorizeRoles)("COMPANY"), (0, auth_middleware_1.authorizeCompanyRoles)("OWNER", "MANAGER", "ANALYST"), credit_controller_1.getMyCreditTransactionsController);
+router.get("/admin/transactions", (0, auth_middleware_1.authorizeRoles)("ADMIN"), credit_controller_1.adminGetAllCreditTransactionsController);
+router.get("/admin/companies/:companyId/transactions", (0, auth_middleware_1.authorizeRoles)("ADMIN"), credit_controller_1.adminGetCompanyCreditTransactionsController);
+router.post("/admin/add", (0, auth_middleware_1.authorizeRoles)("ADMIN"), credit_controller_1.addCreditsController);
+router.post("/admin/adjust", (0, auth_middleware_1.authorizeRoles)("ADMIN"), credit_controller_1.adjustCreditsController);
+exports.default = router;

@@ -47,8 +47,6 @@ export const updateMeSchema = z
 
 export type UpdateMeInput = z.infer<typeof updateMeSchema>;
 
-export type UpdateMeInput = z.infer<typeof updateMeSchema>;
-
 export const loginSchema = z.object({
   email: z.string().email("Email invalide"),
   password: z.string().min(1, "Le mot de passe est obligatoire"),

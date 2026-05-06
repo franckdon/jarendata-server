@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "../../config/prisma";
 import { AppError } from "../../utils/appError";
 import { paginate } from "../../utils/pagination";
@@ -9,6 +10,15 @@ import {
   SyncContactInput,
   UpdateContactInput,
 } from "./audience.validation";
+
+const toPrismaJson = (
+  value: unknown
+): Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput | undefined => {
+  if (value === undefined) return undefined;
+  if (value === null) return Prisma.JsonNull;
+
+  return value as Prisma.InputJsonValue;
+};
 
 const normalizePhone = (phone: string) => {
   return phone.replace(/\s+/g, "").trim();
@@ -95,7 +105,10 @@ export const createContactService = async (
     });
 
     if (existingExternal) {
-      throw new AppError("Un contact avec cet identifiant externe existe déjà", 409);
+      throw new AppError(
+        "Un contact avec cet identifiant externe existe déjà",
+        409
+      );
     }
   }
 
@@ -112,7 +125,7 @@ export const createContactService = async (
       gender: data.gender,
       ageRange: data.ageRange,
       externalId: data.externalId,
-      metadata: data.metadata,
+      metadata: toPrismaJson(data.metadata),
       source: data.source || "MANUAL",
       consentStatus,
       optInAt: consentStatus === "ACCEPTED" ? new Date() : undefined,
@@ -154,7 +167,8 @@ export const importContactsService = async (
       });
 
       const finalTags = mergeTags(item.tags || [], data.defaultTags || []);
-      const consentStatus = item.consentStatus || data.consentStatus || "PENDING";
+      const consentStatus =
+        item.consentStatus || data.consentStatus || "PENDING";
 
       if (existingContact) {
         await prisma.contact.update({
@@ -167,7 +181,7 @@ export const importContactsService = async (
             gender: item.gender ?? existingContact.gender,
             ageRange: item.ageRange ?? existingContact.ageRange,
             externalId: item.externalId ?? existingContact.externalId,
-            metadata: item.metadata ?? existingContact.metadata,
+            metadata: toPrismaJson(item.metadata ?? existingContact.metadata),
             source: "IMPORT",
             consentStatus,
             optInAt:
@@ -192,7 +206,7 @@ export const importContactsService = async (
             gender: item.gender,
             ageRange: item.ageRange,
             externalId: item.externalId,
-            metadata: item.metadata,
+            metadata: toPrismaJson(item.metadata),
             source: "IMPORT",
             consentStatus,
             optInAt: consentStatus === "ACCEPTED" ? new Date() : undefined,
@@ -253,7 +267,7 @@ export const syncContactFromApiService = async (
         city: data.city ?? existingByExternalId.city,
         gender: data.gender ?? existingByExternalId.gender,
         ageRange: data.ageRange ?? existingByExternalId.ageRange,
-        metadata: data.metadata ?? existingByExternalId.metadata,
+        metadata: toPrismaJson(data.metadata ?? existingByExternalId.metadata),
         source: "API",
         consentStatus,
         optInAt:
@@ -290,7 +304,7 @@ export const syncContactFromApiService = async (
         city: data.city ?? existingByPhone.city,
         gender: data.gender ?? existingByPhone.gender,
         ageRange: data.ageRange ?? existingByPhone.ageRange,
-        metadata: data.metadata ?? existingByPhone.metadata,
+        metadata: toPrismaJson(data.metadata ?? existingByPhone.metadata),
         source: "API",
         consentStatus,
         optInAt:
@@ -318,7 +332,7 @@ export const syncContactFromApiService = async (
       city: data.city,
       gender: data.gender,
       ageRange: data.ageRange,
-      metadata: data.metadata,
+      metadata: toPrismaJson(data.metadata),
       source: "API",
       consentStatus,
       optInAt: consentStatus === "ACCEPTED" ? new Date() : undefined,
@@ -370,7 +384,7 @@ export const optInContactService = async (data: OptInContactInput) => {
         email: data.email ?? existingContact.email,
         country: data.country ?? existingContact.country,
         city: data.city ?? existingContact.city,
-        metadata: data.metadata ?? existingContact.metadata,
+        metadata: toPrismaJson(data.metadata ?? existingContact.metadata),
         source: "WHATSAPP_OPT_IN",
         consentStatus: "ACCEPTED",
         optInAt: existingContact.optInAt || new Date(),
@@ -393,7 +407,7 @@ export const optInContactService = async (data: OptInContactInput) => {
       email: data.email,
       country: data.country,
       city: data.city,
-      metadata: data.metadata,
+      metadata: toPrismaJson(data.metadata),
       source: "WHATSAPP_OPT_IN",
       consentStatus: "ACCEPTED",
       optInAt: new Date(),
@@ -478,7 +492,10 @@ export const updateContactService = async (
     });
 
     if (existingExternal) {
-      throw new AppError("Un autre contact utilise déjà cet identifiant externe", 409);
+      throw new AppError(
+        "Un autre contact utilise déjà cet identifiant externe",
+        409
+      );
     }
   }
 
@@ -487,8 +504,19 @@ export const updateContactService = async (
       id: contactId,
     },
     data: {
-      ...data,
-      ...(phone ? { phone } : {}),
+      fullName: data.fullName,
+      phone: phone ?? undefined,
+      email: data.email,
+      country: data.country,
+      city: data.city,
+      gender: data.gender,
+      ageRange: data.ageRange,
+      externalId: data.externalId,
+      metadata: toPrismaJson(data.metadata ?? contact.metadata),
+      source: data.source,
+      consentStatus: data.consentStatus,
+      consentText: data.consentText,
+      tags: data.tags,
       optInAt:
         data.consentStatus === "ACCEPTED" && !contact.optInAt
           ? new Date()

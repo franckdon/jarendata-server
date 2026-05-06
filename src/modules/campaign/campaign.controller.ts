@@ -61,7 +61,7 @@ export const getCampaignByIdController = async (
   try {
     const campaign = await getCampaignByIdService(
       req.user.companyId,
-      req.params.id
+      String(req.params.id)
     );
 
     res.status(200).json({
@@ -83,7 +83,7 @@ export const updateCampaignController = async (
 
     const campaign = await updateCampaignService(
       req.user.companyId,
-      req.params.id,
+      String(req.params.id),
       data
     );
 
@@ -102,7 +102,7 @@ export const deleteCampaignController = async (
   next: NextFunction
 ) => {
   try {
-    await deleteCampaignService(req.user.companyId, req.params.id);
+    await deleteCampaignService(req.user.companyId, String(req.params.id));
 
     res.status(200).json({
       message: "Campagne supprimée avec succès",
@@ -123,7 +123,7 @@ export const updateCampaignStatusController = async (
     const campaign = await updateCampaignStatusService(
         req.user.companyId,
         req.user.userId,
-        req.params.id,
+        String(req.params.id),
         data
     );
 

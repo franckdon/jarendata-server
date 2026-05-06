@@ -75,7 +75,7 @@ export const getCampaignAnswersController = async (
   try {
     const answers = await getCampaignAnswersService(
       req.user.companyId,
-      req.params.campaignId,
+      String(req.params.campaignId),
       req.query
     );
 
@@ -96,7 +96,7 @@ export const getCampaignSessionsController = async (
   try {
     const sessions = await getCampaignSessionsService(
       req.user.companyId,
-      req.params.campaignId,
+      String(req.params.campaignId),
       req.query
     );
 
@@ -117,7 +117,7 @@ export const getCampaignAnalyticsController = async (
   try {
     const analytics = await getCampaignAnalyticsService(
       req.user.companyId,
-      req.params.campaignId
+      String(req.params.campaignId)
     );
 
     res.status(200).json({

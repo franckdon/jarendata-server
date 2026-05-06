@@ -1,0 +1,15 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const response_controller_1 = require("./response.controller");
+const auth_middleware_1 = require("../../middlewares/auth.middleware");
+const router = (0, express_1.Router)();
+router.use(auth_middleware_1.authMiddleware);
+router.use((0, auth_middleware_1.authorizeRoles)("COMPANY"));
+router.post("/sessions/start", (0, auth_middleware_1.authorizeCompanyRoles)("OWNER", "MANAGER"), response_controller_1.startSurveySessionController);
+router.post("/answers", (0, auth_middleware_1.authorizeCompanyRoles)("OWNER", "MANAGER"), response_controller_1.submitAnswerController);
+router.post("/sessions/complete", (0, auth_middleware_1.authorizeCompanyRoles)("OWNER", "MANAGER"), response_controller_1.completeSurveySessionController);
+router.get("/campaigns/:campaignId/answers", (0, auth_middleware_1.authorizeCompanyRoles)("OWNER", "MANAGER", "ANALYST"), response_controller_1.getCampaignAnswersController);
+router.get("/campaigns/:campaignId/sessions", (0, auth_middleware_1.authorizeCompanyRoles)("OWNER", "MANAGER", "ANALYST"), response_controller_1.getCampaignSessionsController);
+router.get("/campaigns/:campaignId/analytics", (0, auth_middleware_1.authorizeCompanyRoles)("OWNER", "MANAGER", "ANALYST"), response_controller_1.getCampaignAnalyticsController);
+exports.default = router;

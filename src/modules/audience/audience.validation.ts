@@ -9,7 +9,7 @@ export const createContactSchema = z.object({
   gender: z.string().optional(),
   ageRange: z.string().optional(),
   externalId: z.string().optional(),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
   source: z.enum(["MANUAL", "IMPORT", "API", "WHATSAPP_OPT_IN"]).optional(),
   consentStatus: z.enum(["PENDING", "ACCEPTED", "REJECTED"]).optional(),
   consentText: z.string().optional(),
@@ -25,7 +25,7 @@ export const updateContactSchema = z.object({
   gender: z.string().optional(),
   ageRange: z.string().optional(),
   externalId: z.string().optional(),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
   source: z.enum(["MANUAL", "IMPORT", "API", "WHATSAPP_OPT_IN"]).optional(),
   consentStatus: z.enum(["PENDING", "ACCEPTED", "REJECTED"]).optional(),
   consentText: z.string().optional(),
@@ -48,7 +48,7 @@ export const syncContactSchema = z.object({
   gender: z.string().optional(),
   ageRange: z.string().optional(),
   tags: z.array(z.string()).optional(),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
   consentStatus: z.enum(["PENDING", "ACCEPTED", "REJECTED"]).optional(),
 });
 
@@ -61,7 +61,7 @@ export const optInContactSchema = z.object({
   city: z.string().optional(),
   consentText: z.string().optional(),
   tags: z.array(z.string()).optional(),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
 });
 
 export type CreateContactInput = z.infer<typeof createContactSchema>;

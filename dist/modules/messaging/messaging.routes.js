@@ -1,0 +1,15 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const messaging_controller_1 = require("./messaging.controller");
+const auth_middleware_1 = require("../../middlewares/auth.middleware");
+const router = (0, express_1.Router)();
+router.get("/webhook", messaging_controller_1.verifyWhatsAppWebhookController);
+router.post("/webhook", messaging_controller_1.receiveWhatsAppWebhookController);
+router.get("/settings/me", auth_middleware_1.authMiddleware, (0, auth_middleware_1.authorizeRoles)("COMPANY"), (0, auth_middleware_1.authorizeCompanyRoles)("OWNER", "MANAGER"), messaging_controller_1.getMyMessagingAccountController);
+router.put("/settings/me", auth_middleware_1.authMiddleware, (0, auth_middleware_1.authorizeRoles)("COMPANY"), (0, auth_middleware_1.authorizeCompanyRoles)("OWNER"), messaging_controller_1.upsertMyMessagingAccountController);
+router.get("/platform/settings", auth_middleware_1.authMiddleware, (0, auth_middleware_1.authorizeRoles)("ADMIN"), messaging_controller_1.getPlatformMessagingAccountController);
+router.put("/platform/settings", auth_middleware_1.authMiddleware, (0, auth_middleware_1.authorizeRoles)("ADMIN"), messaging_controller_1.upsertPlatformMessagingAccountController);
+router.get("/logs", auth_middleware_1.authMiddleware, (0, auth_middleware_1.authorizeRoles)("COMPANY"), (0, auth_middleware_1.authorizeCompanyRoles)("OWNER", "MANAGER", "ANALYST"), messaging_controller_1.getMessageLogsController);
+router.post("/campaigns/:campaignId/send", auth_middleware_1.authMiddleware, (0, auth_middleware_1.authorizeRoles)("COMPANY"), (0, auth_middleware_1.authorizeCompanyRoles)("OWNER", "MANAGER"), messaging_controller_1.sendCampaignMessagesController);
+exports.default = router;

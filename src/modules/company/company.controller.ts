@@ -112,7 +112,7 @@ export const getCompanyByIdController = async (
   next: NextFunction
 ) => {
   try {
-    const company = await getCompanyByIdService(req.params.id);
+    const company = await getCompanyByIdService(String(req.params.id));
 
     res.status(200).json({
       message: "Entreprise récupérée avec succès",
@@ -132,7 +132,7 @@ export const updateCompanyController = async (
     const data = updateCompanySchema.parse(req.body);
     const logoUrl = getUploadedLogoUrl(req);
 
-    const company = await updateCompanyService(req.params.id, data, logoUrl);
+    const company = await updateCompanyService(String(req.params.id), data, logoUrl);
 
     res.status(200).json({
       message: "Entreprise mise à jour avec succès",
@@ -150,7 +150,7 @@ export const updateCompanyStatusController = async (
 ) => {
   try {
     const data = updateCompanyStatusSchema.parse(req.body);
-    const company = await updateCompanyStatusService(req.params.id, data);
+    const company = await updateCompanyStatusService(String(req.params.id), data);
 
     res.status(200).json({
       message: "Statut de l'entreprise mis à jour avec succès",
@@ -167,7 +167,7 @@ export const deleteCompanyController = async (
   next: NextFunction
 ) => {
   try {
-    await deleteCompanyService(req.params.id);
+    await deleteCompanyService(String(req.params.id));
 
     res.status(200).json({
       message: "Entreprise supprimée avec succès",
@@ -185,7 +185,7 @@ export const createCompanyMemberController = async (
   try {
     const data = createCompanyMemberSchema.parse(req.body);
 
-    const member = await createCompanyMemberService(req.params.id, data);
+    const member = await createCompanyMemberService(String(req.params.id), data);
 
     res.status(201).json({
       message: "Membre ajouté avec succès",
@@ -205,8 +205,8 @@ export const updateCompanyMemberRoleController = async (
     const data = updateCompanyMemberRoleSchema.parse(req.body);
 
     const member = await updateCompanyMemberRoleService(
-      req.params.id,
-      req.params.userId,
+      String(req.params.id),
+      String(req.params.userId),
       data
     );
 
@@ -228,8 +228,8 @@ export const updateCompanyMemberStatusController = async (
     const data = updateCompanyMemberStatusSchema.parse(req.body);
 
     const member = await updateCompanyMemberStatusService(
-      req.params.id,
-      req.params.userId,
+      String(req.params.id),
+      String(req.params.userId),
       data
     );
 
@@ -248,7 +248,7 @@ export const deleteCompanyMemberController = async (
   next: NextFunction
 ) => {
   try {
-    await deleteCompanyMemberService(req.params.id, req.params.userId);
+    await deleteCompanyMemberService(String(req.params.id), String(req.params.userId));
 
     res.status(200).json({
       message: "Membre supprimé avec succès",

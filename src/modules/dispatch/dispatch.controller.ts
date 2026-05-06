@@ -17,7 +17,7 @@ export const previewCampaignRecipientsController = async (
   try {
     const preview = await previewCampaignRecipientsService(
       req.user.companyId,
-      req.params.campaignId
+      String(req.params.campaignId)
     );
 
     res.status(200).json({
@@ -37,7 +37,7 @@ export const generateCampaignRecipientsController = async (
   try {
     const result = await generateCampaignRecipientsService(
       req.user.companyId,
-      req.params.campaignId
+      String(req.params.campaignId)
     );
 
     res.status(201).json({
@@ -57,7 +57,7 @@ export const getCampaignRecipientsController = async (
   try {
     const recipients = await getCampaignRecipientsService(
       req.user.companyId,
-      req.params.campaignId,
+      String(req.params.campaignId),
       req.query
     );
 
@@ -78,7 +78,7 @@ export const getCampaignRecipientStatsController = async (
   try {
     const stats = await getCampaignRecipientStatsService(
       req.user.companyId,
-      req.params.campaignId
+      String(req.params.campaignId)
     );
 
     res.status(200).json({
@@ -100,8 +100,8 @@ export const updateCampaignRecipientStatusController = async (
 
     const recipient = await updateCampaignRecipientStatusService(
       req.user.companyId,
-      req.params.campaignId,
-      req.params.recipientId,
+      String(req.params.campaignId),
+      String(req.params.recipientId),
       data
     );
 
@@ -122,7 +122,7 @@ export const clearCampaignRecipientsController = async (
   try {
     await clearCampaignRecipientsService(
       req.user.companyId,
-      req.params.campaignId
+      String(req.params.campaignId)
     );
 
     res.status(200).json({

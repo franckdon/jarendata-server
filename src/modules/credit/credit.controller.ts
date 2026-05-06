@@ -53,7 +53,7 @@ export const adminGetCompanyCreditTransactionsController = async (
 ) => {
   try {
     const transactions = await adminGetCompanyCreditTransactionsService(
-      req.params.companyId,
+      String(req.params.companyId),
       req.query
     );
 

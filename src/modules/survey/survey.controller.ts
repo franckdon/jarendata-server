@@ -25,7 +25,7 @@ export const getSurveyFlowController = async (
   try {
     const questions = await getSurveyFlowService(
       req.user.companyId,
-      req.params.campaignId
+      String(req.params.campaignId)
     );
 
     res.status(200).json({
@@ -47,7 +47,7 @@ export const createSurveyQuestionController = async (
 
     const question = await createSurveyQuestionService(
       req.user.companyId,
-      req.params.campaignId,
+      String(req.params.campaignId),
       data
     );
 
@@ -70,8 +70,8 @@ export const updateSurveyQuestionController = async (
 
     const question = await updateSurveyQuestionService(
       req.user.companyId,
-      req.params.campaignId,
-      req.params.questionId,
+      String(req.params.campaignId),
+      String(req.params.questionId),
       data
     );
 
@@ -92,8 +92,8 @@ export const deleteSurveyQuestionController = async (
   try {
     await deleteSurveyQuestionService(
       req.user.companyId,
-      req.params.campaignId,
-      req.params.questionId
+      String(req.params.campaignId),
+      String(req.params.questionId)
     );
 
     res.status(200).json({
@@ -114,8 +114,8 @@ export const replaceQuestionOptionsController = async (
 
     const question = await replaceQuestionOptionsService(
       req.user.companyId,
-      req.params.campaignId,
-      req.params.questionId,
+      String(req.params.campaignId),
+      String(req.params.questionId),
       data.options
     );
 
@@ -138,8 +138,8 @@ export const updateOptionNextQuestionController = async (
 
     const option = await updateOptionNextQuestionService(
       req.user.companyId,
-      req.params.campaignId,
-      req.params.optionId,
+      String(req.params.campaignId),
+      String(req.params.optionId),
       data
     );
 
@@ -162,7 +162,7 @@ export const reorderQuestionsController = async (
 
     const questions = await reorderQuestionsService(
       req.user.companyId,
-      req.params.campaignId,
+      String(req.params.campaignId),
       data
     );
 
@@ -185,7 +185,7 @@ export const applySurveyTemplateController = async (
 
     const questions = await applySurveyTemplateService(
       req.user.companyId,
-      req.params.campaignId,
+      String(req.params.campaignId),
       data
     );
 

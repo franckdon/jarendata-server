@@ -1,0 +1,17 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const survey_controller_1 = require("./survey.controller");
+const auth_middleware_1 = require("../../middlewares/auth.middleware");
+const router = (0, express_1.Router)();
+router.use(auth_middleware_1.authMiddleware);
+router.use((0, auth_middleware_1.authorizeRoles)("COMPANY"));
+router.get("/campaigns/:campaignId/questions", (0, auth_middleware_1.authorizeCompanyRoles)("OWNER", "MANAGER", "ANALYST", "MEMBER"), survey_controller_1.getSurveyFlowController);
+router.post("/campaigns/:campaignId/questions", (0, auth_middleware_1.authorizeCompanyRoles)("OWNER", "MANAGER"), survey_controller_1.createSurveyQuestionController);
+router.patch("/campaigns/:campaignId/questions/reorder", (0, auth_middleware_1.authorizeCompanyRoles)("OWNER", "MANAGER"), survey_controller_1.reorderQuestionsController);
+router.post("/campaigns/:campaignId/templates", (0, auth_middleware_1.authorizeCompanyRoles)("OWNER", "MANAGER"), survey_controller_1.applySurveyTemplateController);
+router.patch("/campaigns/:campaignId/questions/:questionId", (0, auth_middleware_1.authorizeCompanyRoles)("OWNER", "MANAGER"), survey_controller_1.updateSurveyQuestionController);
+router.delete("/campaigns/:campaignId/questions/:questionId", (0, auth_middleware_1.authorizeCompanyRoles)("OWNER", "MANAGER"), survey_controller_1.deleteSurveyQuestionController);
+router.put("/campaigns/:campaignId/questions/:questionId/options", (0, auth_middleware_1.authorizeCompanyRoles)("OWNER", "MANAGER"), survey_controller_1.replaceQuestionOptionsController);
+router.patch("/campaigns/:campaignId/options/:optionId/next-question", (0, auth_middleware_1.authorizeCompanyRoles)("OWNER", "MANAGER"), survey_controller_1.updateOptionNextQuestionController);
+exports.default = router;

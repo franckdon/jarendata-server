@@ -1,0 +1,15 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const dispatch_controller_1 = require("./dispatch.controller");
+const auth_middleware_1 = require("../../middlewares/auth.middleware");
+const router = (0, express_1.Router)();
+router.use(auth_middleware_1.authMiddleware);
+router.use((0, auth_middleware_1.authorizeRoles)("COMPANY"));
+router.get("/campaigns/:campaignId/recipients/preview", (0, auth_middleware_1.authorizeCompanyRoles)("OWNER", "MANAGER", "ANALYST"), dispatch_controller_1.previewCampaignRecipientsController);
+router.post("/campaigns/:campaignId/recipients/generate", (0, auth_middleware_1.authorizeCompanyRoles)("OWNER", "MANAGER"), dispatch_controller_1.generateCampaignRecipientsController);
+router.get("/campaigns/:campaignId/recipients", (0, auth_middleware_1.authorizeCompanyRoles)("OWNER", "MANAGER", "ANALYST"), dispatch_controller_1.getCampaignRecipientsController);
+router.get("/campaigns/:campaignId/recipients/stats", (0, auth_middleware_1.authorizeCompanyRoles)("OWNER", "MANAGER", "ANALYST"), dispatch_controller_1.getCampaignRecipientStatsController);
+router.patch("/campaigns/:campaignId/recipients/:recipientId/status", (0, auth_middleware_1.authorizeCompanyRoles)("OWNER", "MANAGER"), dispatch_controller_1.updateCampaignRecipientStatusController);
+router.delete("/campaigns/:campaignId/recipients/clear", (0, auth_middleware_1.authorizeCompanyRoles)("OWNER", "MANAGER"), dispatch_controller_1.clearCampaignRecipientsController);
+exports.default = router;
