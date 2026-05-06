@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { loginSchema, registerSchema } from "./auth.validation";
-import { getMeService, loginService, registerService } from "./auth.service";
+import { loginSchema, registerSchema, updateMeSchema } from "./auth.validation";
+import { getMeService, loginService, registerService, updateMeService } from "./auth.service";
 
 export const registerController = async (
   req: Request,
@@ -49,6 +49,24 @@ export const meController = async (
 
     res.status(200).json({
       message: "Utilisateur connecté",
+      data: user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateMeController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const data = updateMeSchema.parse(req.body);
+    const user = await updateMeService(req.user.userId, data);
+
+    res.status(200).json({
+      message: "Profil mis à jour avec succès",
       data: user,
     });
   } catch (error) {

@@ -15,6 +15,7 @@ import {
 } from "./company.controller";
 import {
   authMiddleware,
+  authorizeCompanyRoles,
   authorizeRoles,
 } from "../../middlewares/auth.middleware";
 import { uploadCompanyLogo } from "../../middlewares/upload.middleware";
@@ -32,6 +33,7 @@ router.patch(
   "/me",
   authMiddleware,
   authorizeRoles("COMPANY"),
+  authorizeCompanyRoles("OWNER"),
   uploadCompanyLogo.single("logo"),
   updateMyCompanyController
 );
